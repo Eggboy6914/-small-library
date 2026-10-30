@@ -18,7 +18,9 @@
   --accent: #1677d2;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -37,7 +39,9 @@ body.dark {
   --accent: #72b7ff;
 }
 
-button, input, textarea { font: inherit; }
+button, input, textarea {
+  font: inherit;
+}
 
 button {
   padding: 10px 13px;
@@ -54,7 +58,9 @@ button.primary {
   border-color: var(--accent);
 }
 
-button:disabled { opacity: .35; }
+button:disabled {
+  opacity: .35;
+}
 
 input, textarea {
   width: 100%;
@@ -83,8 +89,14 @@ header {
   background: var(--bg);
 }
 
-h1 { margin: 0; font-size: 20px; }
-h2 { overflow-wrap: anywhere; }
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+
+h2 {
+  overflow-wrap: anywhere;
+}
 
 main {
   max-width: 900px;
@@ -92,7 +104,9 @@ main {
   padding: 14px;
 }
 
-.hidden { display: none !important; }
+.hidden {
+  display: none !important;
+}
 
 .row {
   display: flex;
@@ -101,7 +115,10 @@ main {
   align-items: center;
 }
 
-.stack { display: grid; gap: 10px; }
+.stack {
+  display: grid;
+  gap: 10px;
+}
 
 .card {
   padding: 13px;
@@ -115,7 +132,10 @@ main {
   text-align: left;
 }
 
-.subtle { font-size: 13px; opacity: .7; }
+.subtle {
+  font-size: 13px;
+  opacity: .7;
+}
 
 label {
   display: block;
@@ -153,7 +173,9 @@ label {
   margin: 12px 0;
 }
 
-.reader-toolbar button { padding: 8px 10px; }
+.reader-toolbar button {
+  padding: 8px 10px;
+}
 
 .notice {
   padding: 10px;
@@ -164,7 +186,7 @@ label {
   line-height: 1.7;
 }
 
-/* 読書領域 */
+/* 読書画面 */
 .reading-shell {
   overflow: hidden;
   border: 1px solid var(--border);
@@ -172,56 +194,78 @@ label {
   background: var(--bg);
 }
 
+/*
+  横書きで表示し、上下にスクロールする。
+  横方向のスクロールは無効にする。
+*/
 .reading-area {
   position: relative;
   width: 100%;
   height: 70vh;
   height: 70dvh;
   min-height: 360px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  direction: rtl;
-  overscroll-behavior-x: contain;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  direction: ltr;
+  overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-x;
+  touch-action: pan-y;
   scrollbar-width: thin;
 }
 
-/*
-  縦書きの本文はひとつの流れとして配置。
-  改行は表示上の段落にせず、文章の流れにまとめる。
-  高さを保ち、横方向に列を追加していく。
-*/
+/* 本文全体 */
 .reading-text {
-  height: 100%;
-  width: max-content;
-  min-width: 100%;
-  padding: 18px 22px 24px;
-  writing-mode: vertical-rl;
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  padding: 20px 22px 28px;
+
+  writing-mode: horizontal-tb;
   text-orientation: mixed;
+
   white-space: normal;
   overflow-wrap: anywhere;
   word-break: normal;
   line-break: strict;
+
   line-height: 1.9;
   letter-spacing: .04em;
   font-size: var(--reader-size, 20px);
 }
 
-/* 元の改行位置はマーカーの単位として残すが、
-   改行そのものでは列を強制しない */
+/*
+  入力時の改行を維持する。
+  各行を独立させ、行同士の文字の干渉を防ぐ。
+*/
 .text-line {
-  display: inline;
+  display: block;
+  width: 100%;
+  min-height: 1.9em;
+
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  line-break: strict;
+  line-height: 1.9;
+
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
 
+/* 空行も改行として表示する */
+.text-line.empty-line {
+  min-height: 1.9em;
+}
+
+/* マーカー */
 .text-line.marked {
   background: var(--mark);
   border-radius: 3px;
 }
 
-/* 右側が前の話、左側が次の話 */
+/* 前の話は右、次の話は左 */
 .reader-nav {
   display: flex;
   flex-direction: row-reverse;
@@ -236,7 +280,9 @@ label {
 }
 
 @media (max-width: 480px) {
-  main { padding: 10px; }
+  main {
+    padding: 10px;
+  }
 
   .reading-area {
     height: 70vh;
@@ -245,7 +291,7 @@ label {
   }
 
   .reading-text {
-    padding: 18px 20px 24px;
+    padding: 18px 16px 26px;
   }
 }
 </style>
@@ -258,6 +304,7 @@ label {
 </header>
 
 <main>
+
 <section id="shelfView">
   <div class="row">
     <button class="primary" id="addWorkBtn">作品を追加</button>
@@ -318,8 +365,8 @@ label {
   </div>
 
   <div class="notice">
-    縦書きで右から左へ読み進めます。左右にスワイプしてください。<br>
-    文章は自動で折り返されます。タップした行のマーカーと読書位置は保存されます。
+    横書きで左から右へ読みます。上下にスワイプして読み進めてください。<br>
+    入力した改行はそのまま表示されます。行をタップすると青くマークされ、読書位置も自動保存されます。
   </div>
 
   <div class="reading-shell">
@@ -333,6 +380,7 @@ label {
     <button id="nextChapterBtn">次の話</button>
   </div>
 </section>
+
 </main>
 
 <script>
@@ -360,6 +408,7 @@ function loadDB() {
     const data = JSON.parse(localStorage.getItem(DATA_KEY));
     if (data && Array.isArray(data.works)) return data;
   } catch (e) {}
+
   return { works: [] };
 }
 
@@ -389,9 +438,12 @@ function saveSettings() {
 
 function applyTheme() {
   document.body.classList.toggle("dark", settings.dark);
+
   document.documentElement.style.setProperty(
-    "--reader-size", settings.fontSize + "px"
+    "--reader-size",
+    settings.fontSize + "px"
   );
+
   $("themeBtn").textContent = settings.dark ? "白背景" : "黒背景";
 }
 
@@ -406,7 +458,9 @@ function getChapter() {
 
 function showView(id) {
   ["shelfView", "workView", "editorView", "readerView"]
-    .forEach(view => $(view).classList.toggle("hidden", view !== id));
+    .forEach(view => {
+      $(view).classList.toggle("hidden", view !== id);
+    });
 
   $("homeBtn").classList.toggle("hidden", id === "shelfView");
 }
@@ -436,11 +490,13 @@ function renderShelf() {
     count.textContent = w.chapters.length + "話";
 
     button.append(title, count);
+
     button.onclick = () => {
       currentWorkId = w.id;
       renderWork();
       showView("workView");
     };
+
     list.appendChild(button);
   });
 }
@@ -450,6 +506,7 @@ function renderWork() {
   if (!w) return;
 
   $("workHeading").textContent = w.title;
+
   const list = $("chaptersList");
   list.replaceChildren();
 
@@ -489,6 +546,7 @@ function openEditor(id = null) {
   $("editorHeading").textContent = c ? "話を編集" : "話を追加";
   $("chapterTitle").value = c ? c.title : "";
   $("chapterBody").value = c ? c.text : "";
+
   $("deleteChapterBtn").classList.toggle("hidden", !c);
 
   showView("editorView");
@@ -503,6 +561,7 @@ function saveChapter() {
 
   if (editingChapterId) {
     const c = w.chapters.find(x => x.id === editingChapterId);
+
     if (c) {
       c.title = title;
       c.text = text;
@@ -512,7 +571,7 @@ function saveChapter() {
       id: uid(),
       title,
       text,
-      scrollLeft: 0,
+      scrollTop: 0,
       marked: null
     });
   }
@@ -522,7 +581,7 @@ function saveChapter() {
   showView("workView");
 }
 
-/* 本文を表示する */
+/* 読書画面を開く */
 function openReader(id) {
   currentChapterId = id;
 
@@ -537,56 +596,77 @@ function openReader(id) {
 
   requestAnimationFrame(() => {
     const area = $("readingArea");
-    area.scrollLeft = c.scrollLeft || 0;
+
+    /* 新形式の保存位置を使用 */
+    area.scrollTop = Number(c.scrollTop) || 0;
+    area.scrollLeft = 0;
   });
 }
 
+/* 横書き本文を描画 */
 function renderReader() {
   const c = getChapter();
   if (!c) return;
 
   const token = ++readerRenderToken;
   const textElement = $("readingText");
+
   textElement.replaceChildren();
 
-  /*
-    元の改行を表示上の強制改行にせず、ひとつの文章として流す。
-    元の行ごとのspanは、マーカーの単位としてのみ利用する。
-  */
-  const lines = (c.text || "").replace(/\r\n?/g, "\n").split("\n");
+  const body = (c.text || "").replace(/\r\n?/g, "\n");
+  const lines = body.split("\n");
 
-  lines.forEach((line, index) => {
-    if (!line) return;
+  if (!body.length) {
+    const empty = document.createElement("div");
+    empty.className = "text-line";
+    empty.textContent =
+      "本文がありません。話を編集して本文を入力してください。";
 
-    const span = document.createElement("span");
-    span.className = "text-line";
-    span.dataset.line = String(index);
-    span.textContent = line;
+    textElement.appendChild(empty);
+  } else {
+    lines.forEach((line, index) => {
+      const span = document.createElement("div");
 
-    if (c.marked === index) {
-      span.classList.add("marked");
-    }
+      span.className = "text-line";
+      span.dataset.line = String(index);
 
-    span.addEventListener("click", () => {
-      if (token !== readerRenderToken) return;
+      /*
+        空行を削除せず、改行として維持する。
+        空のdivがつぶれないよう専用クラスを付ける。
+      */
+      if (line.length === 0) {
+        span.classList.add("empty-line");
+        span.textContent = "\u00a0";
+      } else {
+        span.textContent = line;
+      }
 
-      c.marked = c.marked === index ? null : index;
-      saveDB();
+      if (Number(c.marked) === index &&
+          c.marked !== null &&
+          c.marked !== undefined) {
+        span.classList.add("marked");
+      }
 
-      const area = $("readingArea");
-      const savedScroll = area.scrollLeft;
-      renderReader();
+      span.addEventListener("click", () => {
+        if (token !== readerRenderToken) return;
 
-      requestAnimationFrame(() => {
-        area.scrollLeft = savedScroll;
+        const area = $("readingArea");
+        const savedTop = area.scrollTop;
+
+        c.marked =
+          c.marked === index ? null : index;
+
+        saveDB();
+        renderReader();
+
+        requestAnimationFrame(() => {
+          area.scrollTop = savedTop;
+          area.scrollLeft = 0;
+        });
       });
+
+      textElement.appendChild(span);
     });
-
-    textElement.appendChild(span);
-  });
-
-  if (!lines.length || !(c.text || "").length) {
-    textElement.textContent = "本文がありません。話を編集して本文を入力してください。";
   }
 
   const w = getWork();
@@ -595,7 +675,8 @@ function renderReader() {
   );
 
   $("prevChapterBtn").disabled = index <= 0;
-  $("nextChapterBtn").disabled = index < 0 || index >= w.chapters.length - 1;
+  $("nextChapterBtn").disabled =
+    index < 0 || index >= w.chapters.length - 1;
 
   $("markBtn").textContent =
     c.marked === null || c.marked === undefined
@@ -612,11 +693,16 @@ function moveChapter(delta) {
   );
 
   const next = w.chapters[index + delta];
-  if (next) openReader(next.id);
+
+  if (next) {
+    openReader(next.id);
+  }
 }
 
+/* 作品を追加 */
 $("addWorkBtn").onclick = () => {
   const title = prompt("作品タイトルを入力してください");
+
   if (!title || !title.trim()) return;
 
   const w = {
@@ -634,20 +720,23 @@ $("addWorkBtn").onclick = () => {
   showView("workView");
 };
 
+/* 作品名変更 */
 $("renameWorkBtn").onclick = () => {
   const w = getWork();
   if (!w) return;
 
   const title = prompt("作品タイトル", w.title);
+
   if (title && title.trim()) {
     w.title = title.trim();
+
     saveDB();
     renderShelf();
     renderWork();
   }
 };
 
-/* 作品そのものを削除 */
+/* 作品削除 */
 $("deleteWorkBtn").onclick = () => {
   const w = getWork();
   if (!w) return;
@@ -659,6 +748,7 @@ $("deleteWorkBtn").onclick = () => {
   if (!confirm(message)) return;
 
   db.works = db.works.filter(x => x.id !== w.id);
+
   currentWorkId = null;
   currentChapterId = null;
   editingChapterId = null;
@@ -668,14 +758,17 @@ $("deleteWorkBtn").onclick = () => {
   showView("shelfView");
 };
 
+/* 話の追加・保存 */
 $("addChapterBtn").onclick = () => openEditor();
 $("saveChapterBtn").onclick = saveChapter;
 
+/* 編集をキャンセル */
 $("cancelEditorBtn").onclick = () => {
   renderWork();
   showView("workView");
 };
 
+/* 話を削除 */
 $("deleteChapterBtn").onclick = () => {
   if (!confirm("この話を削除しますか？")) return;
 
@@ -691,6 +784,7 @@ $("deleteChapterBtn").onclick = () => {
   showView("workView");
 };
 
+/* 一覧へ戻る */
 $("backShelfBtn").onclick = () => {
   renderShelf();
   showView("shelfView");
@@ -706,6 +800,7 @@ $("homeBtn").onclick = () => {
   showView("shelfView");
 };
 
+/* 文字サイズ */
 $("smallerBtn").onclick = () => {
   settings.fontSize = Math.max(12, settings.fontSize - 2);
   saveSettings();
@@ -716,24 +811,28 @@ $("largerBtn").onclick = () => {
   saveSettings();
 };
 
+/* 背景テーマ */
 $("themeBtn").onclick = () => {
   settings.dark = !settings.dark;
   saveSettings();
 };
 
+/* マーカー解除 */
 $("markBtn").onclick = () => {
   const c = getChapter();
   if (!c) return;
 
   c.marked = null;
+
   saveDB();
   renderReader();
 };
 
+/* 前の話・次の話 */
 $("prevChapterBtn").onclick = () => moveChapter(-1);
 $("nextChapterBtn").onclick = () => moveChapter(1);
 
-/* 読書位置の保存 */
+/* 読書位置を上下方向で保存 */
 $("readingArea").addEventListener("scroll", () => {
   const c = getChapter();
   if (!c) return;
@@ -742,9 +841,11 @@ $("readingArea").addEventListener("scroll", () => {
 
   scrollSaveTimer = setTimeout(() => {
     const current = getChapter();
+
     if (!current || current.id !== c.id) return;
 
-    current.scrollLeft = $("readingArea").scrollLeft;
+    current.scrollTop = $("readingArea").scrollTop;
+
     saveDB();
   }, 150);
 }, { passive: true });
@@ -772,8 +873,10 @@ $("backupBtn").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
 
-/* 復元 */
-$("restoreBtn").onclick = () => $("restoreInput").click();
+/* バックアップから復元 */
+$("restoreBtn").onclick = () => {
+  $("restoreInput").click();
+};
 
 $("restoreInput").onchange = async event => {
   const file = event.target.files[0];
@@ -810,13 +913,15 @@ applyTheme();
 renderShelf();
 showView("shelfView");
 
-/* オフライン用 */
+/* オフライン対応 */
 if ("serviceWorker" in navigator &&
     location.protocol.startsWith("http")) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" })
-      .then(registration => registration.update())
-      .catch(() => {});
+    navigator.serviceWorker.register("./sw.js", {
+      updateViaCache: "none"
+    })
+    .then(registration => registration.update())
+    .catch(() => {});
   });
 }
 </script>
