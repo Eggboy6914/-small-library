@@ -2,66 +2,470 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f5efe6">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="小さな本棚">
 <link rel="manifest" href="./manifest.webmanifest">
 <title>小さな本棚</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;background:#f5efe6;color:#332b25}
-main{max-width:560px;margin:auto;min-height:100vh;padding:28px 18px calc(28px + env(safe-area-inset-bottom))}
-.badge{font-size:12px;letter-spacing:.12em;color:#806d5c}h1{font-size:30px;margin:10px 0}p{line-height:1.7}
-.card{margin-top:18px;padding:18px;border-radius:18px;background:#fffaf4;box-shadow:0 8px 24px #55402a12}
-label{display:block;font-weight:650;margin:12px 0 6px}input,textarea{width:100%;border:1px solid #ddcdbd;border-radius:12px;padding:12px;font:inherit;background:white;color:#332b25}
-textarea{min-height:180px;resize:vertical}button{border:0;border-radius:12px;padding:13px 15px;font-size:16px;font-weight:650;background:#73543e;color:white;margin-top:10px}
-button.secondary{background:#e8d9c9;color:#332b25}.row{display:flex;gap:8px;flex-wrap:wrap}.row button{flex:1}
-.book{border-top:1px solid #eaded1;padding:12px 0}.book h3{margin:0 0 5px}.muted{font-size:13px;color:#806d5c}.status{font-size:13px;color:#806d5c;margin-top:10px}
+:root{--bg:#fff;--fg:#202124;--muted:#6b7280;--line:#d9dde3;--panel:#f5f6f8;--blue:#b9dcff;--blue-border:#438bd4;--button:#222;--button-fg:#fff}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
+body{padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+body.dark{--bg:#111315;--fg:#f1f3f5;--muted:#a7adb5;--line:#3a3e44;--panel:#202327;--blue:#254b70;--blue-border:#78b9f4;--button:#f1f3f5;--button-fg:#111315}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer;border:1px solid var(--line);border-radius:8px;padding:10px 13px;background:var(--bg);color:var(--fg)}
+button.primary{background:var(--button);color:var(--button-fg);border-color:var(--button)}
+button:disabled{opacity:.4;cursor:default}
+input,textarea,select{width:100%;border:1px solid var(--line);border-radius:8px;padding:11px;background:var(--bg);color:var(--fg)}
+textarea{resize:vertical;min-height:190px;line-height:1.7}
+header{position:sticky;top:0;z-index:4;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+header h1{font-size:18px;margin:0;font-weight:650;letter-spacing:.04em}
+header .header-actions{display:flex;gap:7px}
+main{max-width:850px;margin:0 auto;padding:16px}
+h2{font-size:19px;margin:6px 0 14px}
+h3{font-size:15px;margin:0 0 8px}
+.muted{color:var(--muted);font-size:13px}
+.row{display:flex;gap:8px;align-items:center}
+.row>*{min-width:0}
+.stack{display:grid;gap:12px}
+.section{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.list{display:grid;gap:8px}
+.list-item{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:9px;padding:12px;text-align:left;width:100%}
+.list-item .grow{flex:1;min-width:0}
+.list-item .title{font-weight:600;overflow-wrap:anywhere}
+.list-item .sub{font-size:12px;color:var(--muted);margin-top:4px}
+.badge{font-size:12px;color:var(--muted);white-space:nowrap}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.field{display:grid;gap:6px}
+.field label{font-size:13px;color:var(--muted)}
+.empty{padding:26px 10px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:10px;line-height:1.7}
+.hidden{display:none!important}
+#reader{position:fixed;inset:0;background:var(--bg);z-index:10;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.reader-top{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);min-height:48px}
+.reader-top .reader-title{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reader-top button{padding:7px 10px}
+.reader-main{flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
+.page-area{flex:1;min-height:0;display:flex;justify-content:center;align-items:stretch;position:relative;overflow:hidden;touch-action:pan-y}
+.page-text{display:flex;flex-direction:row-reverse;align-items:flex-start;gap:0;overflow:hidden;padding:20px 18px 18px;font-size:22px;max-height:100%;max-width:100%;user-select:none;-webkit-user-select:none}
+.line{display:block;flex:0 0 auto;writing-mode:vertical-rl;text-orientation:mixed;white-space:pre-wrap;overflow:hidden;line-height:1.9;letter-spacing:.04em;height:100%;cursor:pointer;border-radius:3px;padding:0 2px; -webkit-box-decoration-break:clone;box-decoration-break:clone}
+.line.marked{background:var(--blue);box-shadow:0 0 0 1px var(--blue-border)}
+.reader-hint{font-size:11px;color:var(--muted);text-align:center;padding:5px}
+.reader-bottom{border-top:1px solid var(--line);padding:9px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.reader-bottom .page-count{font-size:12px;color:var(--muted)}
+.chapter-controls{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;border-top:1px solid var(--line)}
+.chapter-controls button{width:48%}
+#readerNotice{padding:8px 12px;font-size:12px;color:var(--muted);text-align:center}
+dialog{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:14px;width:min(92vw,520px);max-height:85vh;padding:0}
+dialog::backdrop{background:#0008}
+.dialog-head{padding:14px 16px;border-bottom:1px solid var(--line);font-weight:650}
+.dialog-body{padding:16px;display:grid;gap:13px;overflow:auto}
+.dialog-foot{padding:12px 16px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.small{font-size:12px}
+.toast{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:var(--button);color:var(--button-fg);padding:10px 15px;border-radius:20px;z-index:30;font-size:13px;max-width:90vw}
+@media(min-width:650px){main{padding:24px}.page-text{font-size:24px;padding:28px 36px}.reader-bottom,.chapter-controls{padding-left:22px;padding-right:22px}}
 </style>
 </head>
 <body>
-<main>
-<div class="badge">MY OFFLINE LIBRARY</div>
-<h1>小さな本棚 📚</h1>
-<p>自分だけの小説を保存する小さな本棚です。初回にページを読み込んだ後は、オフラインで使えるように設計しています。</p>
-<section class="card">
-<h2 style="margin-top:0">小説を書く</h2>
-<label for="title">タイトル</label><input id="title" maxlength="100" placeholder="例：星降る夜に">
-<label for="body">本文</label><textarea id="body" placeholder="ここに小説を書いてね…"></textarea>
-<div class="row"><button id="save">小説を保存</button><button class="secondary" id="clear">入力を消す</button></div>
-<div class="status" id="status" role="status">保存先：このiPhoneのブラウザ内</div>
-</section>
-<section class="card">
-<h2 style="margin-top:0">本棚</h2><div id="library"><p class="muted">まだ小説はありません。</p></div>
-</section>
-<section class="card">
-<h2 style="margin-top:0">オフラインについて</h2>
-<p class="muted">最初に公開ページをSafariで開いて読み込み、ホーム画面に追加してください。保存した小説はこの端末のブラウザ内に保存されます。ブラウザのデータ消去や端末変更で失われる場合があるため、大切な作品は別にもバックアップしてください。</p>
-</section>
+<header id="appHeader">
+  <h1>小さな本棚</h1>
+  <div class="header-actions">
+    <button id="settingsBtn" aria-label="設定">設定</button>
+  </div>
+</header>
+<main id="appMain">
+  <section id="homeView">
+    <div class="row" style="justify-content:space-between;margin-bottom:14px">
+      <div><h2 style="margin-bottom:4px">本棚</h2><div class="muted">作品を選んで読書を始める</div></div>
+      <button class="primary" id="addWorkBtn">＋ 作品を追加</button>
+    </div>
+    <button id="continueBtn" class="primary" style="width:100%;margin-bottom:16px">続きから読む</button>
+    <div id="worksList" class="list"></div>
+  </section>
+
+  <section id="chaptersView" class="hidden">
+    <div class="row" style="margin-bottom:14px">
+      <button id="backHomeBtn">← 本棚</button>
+      <div style="flex:1;min-width:0"><h2 id="workHeading" style="margin:0;overflow-wrap:anywhere"></h2><div id="workSub" class="muted"></div></div>
+      <button id="editWorkBtn">作品編集</button>
+    </div>
+    <div class="actions" style="margin-bottom:12px">
+      <button class="primary" id="addChapterBtn">＋ 話を追加</button>
+      <button id="readFirstBtn">最初の話を読む</button>
+    </div>
+    <div id="chaptersList" class="list"></div>
+  </section>
+
+  <section id="editorView" class="hidden">
+    <div class="row" style="margin-bottom:14px">
+      <button id="cancelEditorBtn">← 戻る</button>
+      <h2 id="editorHeading" style="margin:0;flex:1"></h2>
+    </div>
+    <div class="stack">
+      <div class="field"><label for="chapterTitle">話のタイトル</label><input id="chapterTitle" maxlength="160" placeholder="例：始まりの日"></div>
+      <div class="field"><label for="chapterBody">本文</label><textarea id="chapterBody" placeholder="ここに本文を入力、またはコピーした文章を貼り付けます。"></textarea><div id="charCount" class="muted">0文字</div></div>
+      <div class="actions"><button class="primary" id="saveChapterBtn">保存</button><button id="pasteHelpBtn">貼り付け方法</button></div>
+      <p class="muted">文章はこの端末内に保存されます。400話程度の保存を想定していますが、定期的にバックアップを取ってください。</p>
+    </div>
+  </section>
+
+  <section id="settingsView" class="hidden">
+    <div class="row" style="margin-bottom:14px"><button id="settingsBackBtn">← 戻る</button><h2 style="margin:0">設定とバックアップ</h2></div>
+    <div class="section stack">
+      <h3>読書設定</h3>
+      <div class="field"><label for="fontSize">文字サイズ</label><div class="row"><input id="fontSize" type="range" min="16" max="34" step="1"><span id="fontSizeValue" class="badge">22px</span></div></div>
+      <div class="field"><label for="themeSelect">背景色</label><select id="themeSelect"><option value="light">白</option><option value="dark">黒</option></select></div>
+      <button id="saveSettingsBtn" class="primary">設定を保存</button>
+    </div>
+    <div class="section stack">
+      <h3>バックアップ</h3>
+      <p class="muted">作品・本文・話ごとの読書位置・マーカー・表示設定をJSONファイルに保存します。</p>
+      <button id="exportBtn" class="primary">バックアップを保存</button>
+      <div class="field"><label for="importFile">バックアップから復元</label><input type="file" id="importFile" accept=".json,application/json"></div>
+      <button id="importBtn">選択したファイルを復元</button>
+      <p class="muted">復元すると、現在の本棚データはバックアップ内のデータに置き換わります。復元前に現在のデータもバックアップするのがおすすめです。</p>
+    </div>
+    <div class="section">
+      <h3>オフライン利用について</h3>
+      <p class="muted">最初にSafariでアプリを開き、読み込みが終わってからホーム画面に追加してください。アプリの更新前後にはバックアップを取ってください。</p>
+    </div>
+  </section>
 </main>
+
+<div id="reader" class="hidden">
+  <div class="reader-top">
+    <button id="closeReaderBtn">閉じる</button>
+    <div id="readerTitle" class="reader-title"></div>
+    <button id="readerOptionsBtn">Aa</button>
+  </div>
+  <div class="reader-main">
+    <div class="page-area" id="pageArea" aria-label="小説本文">
+      <div id="pageText" class="page-text"></div>
+    </div>
+    <div class="reader-hint">左へスワイプ：次のページ　／　右へスワイプ：前のページ</div>
+    <div class="reader-bottom">
+      <button id="prevPageBtn">前のページ</button>
+      <span id="pageCount" class="page-count"></span>
+      <button id="nextPageBtn">次のページ</button>
+    </div>
+    <div id="readerNotice">行をタップすると青いマーカーが付きます</div>
+    <div id="chapterControls" class="chapter-controls hidden">
+      <button id="prevChapterBtn">前の話</button>
+      <button id="nextChapterBtn" class="primary">次の話</button>
+    </div>
+  </div>
+</div>
+
+<dialog id="workDialog">
+  <div class="dialog-head" id="workDialogHeading">作品を追加</div>
+  <div class="dialog-body">
+    <div class="field"><label for="workTitleInput">作品タイトル</label><input id="workTitleInput" maxlength="160" placeholder="作品タイトル"></div>
+  </div>
+  <div class="dialog-foot"><button id="cancelWorkDialogBtn">キャンセル</button><button id="saveWorkBtn" class="primary">保存</button></div>
+</dialog>
+
+<dialog id="readerSettingsDialog">
+  <div class="dialog-head">読書設定</div>
+  <div class="dialog-body">
+    <div class="field"><label for="readerFontSize">文字サイズ</label><div class="row"><input id="readerFontSize" type="range" min="16" max="34" step="1"><span id="readerFontValue" class="badge"></span></div></div>
+    <div class="field"><label for="readerTheme">背景色</label><select id="readerTheme"><option value="light">白</option><option value="dark">黒</option></select></div>
+  </div>
+  <div class="dialog-foot"><button id="readerSettingsClose">閉じる</button><button id="readerSettingsSave" class="primary">適用</button></div>
+</dialog>
+
+<div id="toast" class="toast hidden" role="status"></div>
 <script>
-const $=id=>document.getElementById(id);
-let books=[];
-try{books=JSON.parse(localStorage.getItem('small-books')||'[]')}catch(e){}
-function render(){
- const root=$('library'); root.innerHTML='';
- if(!books.length){root.innerHTML='<p class="muted">まだ小説はありません。</p>';return;}
- books.forEach((b,i)=>{
-  const el=document.createElement('div');el.className='book';
-  const h=document.createElement('h3');h.textContent=b.title||'無題';
-  const p=document.createElement('p');p.className='muted';p.textContent=(b.text||'').slice(0,100)+(b.text.length>100?'…':'');
-  const row=document.createElement('div');row.className='row';
-  const read=document.createElement('button');read.textContent='読む／編集';read.onclick=()=>{$('title').value=b.title;$('body').value=b.text;window.scrollTo({top:0,behavior:'smooth'});};
-  const del=document.createElement('button');del.textContent='削除';del.className='secondary';del.onclick=()=>{if(confirm('この小説を削除しますか？')){books.splice(i,1);persist();}};
-  row.append(read,del);el.append(h,p,row);root.append(el);
- });
+(() => {
+'use strict';
+const DB_KEY = 'smallLibrary.v2.data';
+const SETTINGS_KEY = 'smallLibrary.v2.settings';
+const $ = id => document.getElementById(id);
+const state = {
+  works: [], settings: {fontSize:22, theme:'light'},
+  currentWorkId:null, editingWorkId:null, editingChapterId:null,
+  readerWorkId:null, readerChapterId:null, pageIndex:0, pages:[], markedLine:null,
+  touchX:null, touchY:null, lastSaveTimer:null
+};
+const uid = () => (crypto && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36)+Math.random().toString(36).slice(2);
+const now = () => new Date().toISOString();
+function toast(msg){ const el=$('toast'); el.textContent=msg; el.classList.remove('hidden'); clearTimeout(toast.timer); toast.timer=setTimeout(()=>el.classList.add('hidden'),2400); }
+function safeParse(raw, fallback){try{return JSON.parse(raw)||fallback}catch{return fallback}}
+function loadData(){
+  const data=safeParse(localStorage.getItem(DB_KEY),null);
+  if(data && Array.isArray(data.works)) state.works=data.works;
+  const s=safeParse(localStorage.getItem(SETTINGS_KEY),null);
+  if(s) state.settings={...state.settings,...s};
+  applyTheme();
 }
-function persist(){try{localStorage.setItem('small-books',JSON.stringify(books));$('status').textContent='保存しました！';render()}catch(e){$('status').textContent='保存できませんでした。空き容量を確認してください。'}}
-$('save').onclick=()=>{const title=$('title').value.trim()||'無題';const text=$('body').value;if(!text.trim()){ $('status').textContent='本文を入力してね。';return;}books.unshift({title,text,updated:new Date().toISOString()});persist();$('title').value='';$('body').value='';};
-$('clear').onclick=()=>{$('title').value='';$('body').value='';};
-render();
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{$('status').textContent='オフライン準備に失敗しました。ページを再読み込みしてください。';}));}
+function persist(){ try{localStorage.setItem(DB_KEY,JSON.stringify({version:2,updatedAt:now(),works:state.works})); return true}catch(e){toast('保存できません。空き容量を確認してください。'); return false} }
+function persistSettings(){localStorage.setItem(SETTINGS_KEY,JSON.stringify(state.settings));}
+function applyTheme(){
+  document.body.classList.toggle('dark',state.settings.theme==='dark');
+  document.documentElement.style.setProperty('--reader-font',state.settings.fontSize+'px');
+  document.querySelector('meta[name="theme-color"]').content=state.settings.theme==='dark'?'#111315':'#ffffff';
+}
+function getWork(id){return state.works.find(w=>w.id===id)}
+function getChapter(work,id){return work?.chapters.find(c=>c.id===id)}
+function sortedChapters(work){return [...(work?.chapters||[])].sort((a,b)=>a.order-b.order)}
+function currentChapter(){return getChapter(getWork(state.readerWorkId),state.readerChapterId)}
+function showView(name){
+  ['homeView','chaptersView','editorView','settingsView'].forEach(id=>$(id).classList.toggle('hidden',id!==name));
+  $('appHeader').classList.toggle('hidden',name==='editorView');
+}
+function renderHome(){
+  const list=$('worksList'); list.innerHTML='';
+  if(!state.works.length){list.innerHTML='<div class="empty">本棚はまだ空です。<br>「作品を追加」から小説を登録できます。</div>'}
+  state.works.forEach(w=>{
+    const latest=w.chapters?.length ? `${w.chapters.length}話` : '話はまだありません';
+    const btn=document.createElement('button'); btn.className='list-item';
+    const grow=document.createElement('div'); grow.className='grow';
+    const title=document.createElement('div'); title.className='title'; title.textContent=w.title||'無題の作品';
+    const sub=document.createElement('div'); sub.className='sub'; sub.textContent=latest;
+    grow.append(title,sub);
+    const badge=document.createElement('span'); badge.className='badge'; badge.textContent='開く ›';
+    btn.append(grow,badge); btn.addEventListener('click',()=>openWork(w.id)); list.append(btn);
+  });
+  const recent=state.works.map(w=>({w,c:w.chapters.find(c=>c.id===w.lastChapterId)})).find(x=>x.c);
+  $('continueBtn').disabled=!recent;
+}
+function openWork(id){state.currentWorkId=id;renderChapters();showView('chaptersView')}
+function renderChapters(){
+  const w=getWork(state.currentWorkId); if(!w)return;
+  $('workHeading').textContent=w.title;
+  $('workSub').textContent=`${w.chapters.length}話`;
+  const list=$('chaptersList'); list.innerHTML='';
+  const chapters=sortedChapters(w);
+  if(!chapters.length){list.innerHTML='<div class="empty">まだ話がありません。<br>「話を追加」から本文を登録できます。</div>';return}
+  chapters.forEach((c,i)=>{
+    const btn=document.createElement('button');btn.className='list-item';
+    const grow=document.createElement('div');grow.className='grow';
+    const title=document.createElement('div');title.className='title';title.textContent=`第${i+1}話　${c.title||'（タイトルなし）'}`;
+    const sub=document.createElement('div');sub.className='sub';sub.textContent=`${(c.body||'').length.toLocaleString('ja-JP')}文字`;
+    grow.append(title,sub);
+    const badge=document.createElement('span');badge.className='badge';badge.textContent=c.id===w.lastChapterId?'読書中':'読む ›';
+    btn.append(grow,badge);btn.addEventListener('click',()=>openReader(w.id,c.id,false));list.append(btn);
+  });
+}
+function openWorkDialog(edit=false){
+  state.editingWorkId=edit?state.currentWorkId:null;
+  const w=edit?getWork(state.currentWorkId):null;
+  $('workDialogHeading').textContent=edit?'作品を編集':'作品を追加';
+  $('workTitleInput').value=w?.title||'';
+  $('workDialog').showModal();
+  setTimeout(()=>$('workTitleInput').focus(),50);
+}
+function saveWork(){
+  const title=$('workTitleInput').value.trim();
+  if(!title){toast('作品タイトルを入力してください');return}
+  if(state.editingWorkId){const w=getWork(state.editingWorkId);if(w)w.title=title}
+  else state.works.push({id:uid(),title,createdAt:now(),chapters:[],lastChapterId:null});
+  persist();$('workDialog').close();renderHome();
+  if(state.currentWorkId && getWork(state.currentWorkId))renderChapters();
+}
+function openEditor(chapterId=null){
+  state.editingChapterId=chapterId;
+  const w=getWork(state.currentWorkId); if(!w)return;
+  const c=chapterId?getChapter(w,chapterId):null;
+  $('editorHeading').textContent=c?'話を編集':'話を追加';
+  $('chapterTitle').value=c?.title||'';
+  $('chapterBody').value=c?.body||'';
+  updateCharCount();showView('editorView');
+}
+function cancelEditor(){renderChapters();showView('chaptersView')}
+function saveChapter(){
+  const w=getWork(state.currentWorkId);if(!w)return;
+  const title=$('chapterTitle').value.trim();
+  const body=$('chapterBody').value;
+  if(!body.trim()){toast('本文を入力してください');return}
+  let c=state.editingChapterId?getChapter(w,state.editingChapterId):null;
+  if(c){c.title=title;c.body=body;c.updatedAt=now()}
+  else{
+    c={id:uid(),title,body,order:Math.max(0,...w.chapters.map(x=>x.order))+1,createdAt:now(),updatedAt:now(),reading:{pageIndex:0,markedLine:null}};
+    w.chapters.push(c);
+  }
+  persist();renderChapters();showView('chaptersView');toast('保存しました');
+}
+function updateCharCount(){$('charCount').textContent=`${$('chapterBody').value.length.toLocaleString('ja-JP')}文字`}
+function chapterIndex(work,chapterId){return sortedChapters(work).findIndex(c=>c.id===chapterId)}
+function continueReading(){
+  for(const w of state.works){
+    const c=getChapter(w,w.lastChapterId);
+    if(c){openReader(w.id,c.id,true);return}
+  }
+  toast('続きから読める作品がありません');
+}
+function openReader(workId,chapterId,resume=false){
+  const w=getWork(workId),c=getChapter(w,chapterId);if(!w||!c)return;
+  state.readerWorkId=workId;state.readerChapterId=chapterId;
+  if(resume && c.reading){state.pageIndex=c.reading.pageIndex||0;state.markedLine=c.reading.markedLine??null}
+  else{state.pageIndex=c.reading?.pageIndex||0;state.markedLine=c.reading?.markedLine??null}
+  w.lastChapterId=chapterId;
+  if(!c.reading)c.reading={pageIndex:0,markedLine:null};
+  persist();paginateCurrent();
+  $('reader').classList.remove('hidden');
+  document.body.style.overflow='hidden';
+  renderReader();
+}
+function closeReader(){saveReading();$('reader').classList.add('hidden');document.body.style.overflow='';renderHome();if(state.currentWorkId)renderChapters()}
+function getPageMetrics(){
+  const font=state.settings.fontSize;
+  const area=$('pageArea');
+  const width=Math.max(240,area.clientWidth||window.innerWidth);
+  const height=Math.max(260,area.clientHeight||window.innerHeight-120);
+  const colWidth=font*1.95;
+  const columns=Math.max(3,Math.floor((width-44)/colWidth));
+  const charsPerColumn=Math.max(7,Math.floor((height-48)/(font*1.9)));
+  return {columns,charsPerColumn,charsPerPage:columns*charsPerColumn,height};
+}
+function splitTextIntoPages(text){
+  const {charsPerPage}=getPageMetrics();
+  const chars=Array.from(text||'');
+  const pages=[];
+  for(let i=0;i<chars.length;i+=charsPerPage)pages.push(chars.slice(i,i+charsPerPage).join(''));
+  if(!pages.length)pages.push('');
+  return pages;
+}
+function paginateCurrent(){
+  const c=currentChapter();if(!c)return;
+  state.pages=splitTextIntoPages(c.body||'');
+  state.pageIndex=Math.max(0,Math.min(state.pageIndex,state.pages.length-1));
+}
+function renderReader(){
+  const w=getWork(state.readerWorkId),c=currentChapter();if(!w||!c)return;
+  $('readerTitle').textContent=`${w.title}　／　第${chapterIndex(w,c.id)+1}話 ${c.title||''}`;
+  $('pageText').style.fontSize=state.settings.fontSize+'px';
+  $('pageText').innerHTML='';
+  const text=state.pages[state.pageIndex]||'';
+  const metrics=getPageMetrics();
+  const chars=Array.from(text);
+  for(let i=0;i<metrics.columns;i++){
+    const part=chars.slice(i*metrics.charsPerColumn,(i+1)*metrics.charsPerColumn).join('');
+    if(!part && i>0) continue;
+    const span=document.createElement('div');span.className='line';span.textContent=part||'　';
+    span.style.width=(state.settings.fontSize*1.95)+'px';
+    span.style.height='100%';
+    const lineId=`${state.pageIndex}:${i}`;
+    if(state.markedLine===lineId)span.classList.add('marked');
+    span.addEventListener('click',e=>{
+      e.stopPropagation();state.markedLine=lineId;
+      saveReading();renderReader();
+    });
+    $('pageText').append(span);
+  }
+  $('pageCount').textContent=`${state.pageIndex+1} / ${state.pages.length}`;
+  $('prevPageBtn').disabled=state.pageIndex<=0;
+  $('nextPageBtn').disabled=state.pageIndex>=state.pages.length-1;
+  const last=state.pageIndex>=state.pages.length-1;
+  $('chapterControls').classList.toggle('hidden',!last);
+  const idx=chapterIndex(w,c.id), chapters=sortedChapters(w);
+  $('prevChapterBtn').disabled=idx<=0;
+  $('nextChapterBtn').disabled=idx<0||idx>=chapters.length-1;
+  $('readerNotice').textContent=last?'最終ページです。必要なら下のボタンで話を切り替えられます。':'行をタップすると青いマーカーが付きます';
+  $('reader').style.display='flex';
+}
+function saveReading(){
+  const w=getWork(state.readerWorkId),c=currentChapter();if(!w||!c)return;
+  c.reading={pageIndex:state.pageIndex,markedLine:state.markedLine,savedAt:now()};
+  w.lastChapterId=c.id;persist();
+}
+function changePage(delta){
+  const next=state.pageIndex+delta;
+  if(next<0||next>=state.pages.length)return;
+  state.pageIndex=next;saveReading();renderReader();
+}
+function switchChapter(delta){
+  const w=getWork(state.readerWorkId);if(!w)return;
+  const chapters=sortedChapters(w),idx=chapterIndex(w,state.readerChapterId),c=chapters[idx+delta];
+  if(!c)return;
+  saveReading();
+  state.readerChapterId=c.id;state.pageIndex=c.reading?.pageIndex||0;state.markedLine=c.reading?.markedLine??null;
+  w.lastChapterId=c.id;paginateCurrent();saveReading();renderReader();
+}
+function saveSettings(){
+  state.settings.fontSize=Number($('fontSize').value)||22;
+  state.settings.theme=$('themeSelect').value;
+  persistSettings();applyTheme();if(!$('reader').classList.contains('hidden')){paginateCurrent();renderReader()}
+  toast('設定を保存しました');
+}
+function syncSettingsUI(){
+  $('fontSize').value=state.settings.fontSize;$('fontSizeValue').textContent=state.settings.fontSize+'px';$('themeSelect').value=state.settings.theme;
+  $('readerFontSize').value=state.settings.fontSize;$('readerFontValue').textContent=state.settings.fontSize+'px';$('readerTheme').value=state.settings.theme;
+}
+function exportBackup(){
+  const data={app:'小さな本棚',version:2,exportedAt:now(),works:state.works,settings:state.settings};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=`小さな本棚_バックアップ_${new Date().toISOString().slice(0,10)}.json`;
+  document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  toast('バックアップファイルを作成しました');
+}
+async function importBackup(){
+  const file=$('importFile').files[0];if(!file){toast('バックアップファイルを選択してください');return}
+  try{
+    const data=JSON.parse(await file.text());
+    if(!data||!Array.isArray(data.works))throw new Error('invalid');
+    if(!confirm('現在の本棚データを、選択したバックアップの内容に置き換えます。続けますか？'))return;
+    state.works=data.works;
+    if(data.settings)state.settings={...state.settings,...data.settings};
+    persist();persistSettings();applyTheme();syncSettingsUI();renderHome();showView('homeView');
+    $('importFile').value='';toast('バックアップを復元しました');
+  }catch(e){toast('ファイルを読み込めません。正しいバックアップか確認してください')}
+}
+function bind(){
+  $('addWorkBtn').addEventListener('click',()=>openWorkDialog(false));
+  $('saveWorkBtn').addEventListener('click',saveWork);
+  $('cancelWorkDialogBtn').addEventListener('click',()=>$('workDialog').close());
+  $('backHomeBtn').addEventListener('click',()=>{showView('homeView');renderHome()});
+  $('editWorkBtn').addEventListener('click',()=>openWorkDialog(true));
+  $('addChapterBtn').addEventListener('click',()=>openEditor());
+  $('cancelEditorBtn').addEventListener('click',cancelEditor);
+  $('saveChapterBtn').addEventListener('click',saveChapter);
+  $('chapterBody').addEventListener('input',updateCharCount);
+  $('pasteHelpBtn').addEventListener('click',()=>alert('本文欄を長押しして「ペースト」を選ぶと、コピーした文章を貼り付けられます。'));
+  $('readFirstBtn').addEventListener('click',()=>{const w=getWork(state.currentWorkId),c=sortedChapters(w)[0];if(c)openReader(w.id,c.id,false);else toast('先に話を追加してください')});
+  $('continueBtn').addEventListener('click',continueReading);
+  $('settingsBtn').addEventListener('click',()=>{syncSettingsUI();showView('settingsView')});
+  $('settingsBackBtn').addEventListener('click',()=>{showView('homeView');renderHome()});
+  $('saveSettingsBtn').addEventListener('click',saveSettings);
+  $('fontSize').addEventListener('input',()=>$('fontSizeValue').textContent=$('fontSize').value+'px');
+  $('exportBtn').addEventListener('click',exportBackup);
+  $('importBtn').addEventListener('click',importBackup);
+  $('closeReaderBtn').addEventListener('click',closeReader);
+  $('prevPageBtn').addEventListener('click',()=>changePage(-1));
+  $('nextPageBtn').addEventListener('click',()=>changePage(1));
+  $('prevChapterBtn').addEventListener('click',()=>switchChapter(-1));
+  $('nextChapterBtn').addEventListener('click',()=>switchChapter(1));
+  $('readerOptionsBtn').addEventListener('click',()=>{
+    syncSettingsUI();$('readerSettingsDialog').showModal();
+  });
+  $('readerSettingsClose').addEventListener('click',()=>$('readerSettingsDialog').close());
+  $('readerSettingsSave').addEventListener('click',()=>{
+    state.settings.fontSize=Number($('readerFontSize').value)||22;state.settings.theme=$('readerTheme').value;
+    persistSettings();applyTheme();paginateCurrent();renderReader();syncSettingsUI();$('readerSettingsDialog').close();
+  });
+  $('readerFontSize').addEventListener('input',()=>$('readerFontValue').textContent=$('readerFontSize').value+'px');
+  const area=$('pageArea');
+  area.addEventListener('touchstart',e=>{if(e.touches.length===1){state.touchX=e.touches[0].clientX;state.touchY=e.touches[0].clientY}},{passive:true});
+  area.addEventListener('touchend',e=>{
+    if(state.touchX===null||!e.changedTouches.length)return;
+    const dx=e.changedTouches[0].clientX-state.touchX,dy=e.changedTouches[0].clientY-state.touchY;
+    if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.2){if(dx<0)changePage(1);else changePage(-1)}
+    state.touchX=null;state.touchY=null;
+  },{passive:true});
+  area.addEventListener('click',e=>{
+    if(e.target.closest('.line'))return;
+    const rect=area.getBoundingClientRect(),x=e.clientX-rect.left;
+    if(x<rect.width*.22)changePage(1);else if(x>rect.width*.78)changePage(-1);
+  });
+  window.addEventListener('resize',()=>{if(!$('reader').classList.contains('hidden')){const old=state.pageIndex;paginateCurrent();state.pageIndex=Math.min(old,state.pages.length-1);renderReader()}});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)saveReading()});
+  window.addEventListener('pagehide',saveReading);
+}
+loadData();bind();syncSettingsUI();renderHome();showView('homeView');
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+})();
 </script>
 </body>
 </html>

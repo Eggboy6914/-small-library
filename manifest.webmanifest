@@ -1,10 +1,11 @@
 {
-  "name":"小さな本棚",
-  "short_name":"本棚",
-  "start_url":"./index.html",
-  "scope":"./",
-  "display":"standalone",
-  "background_color":"#f5efe6",
-  "theme_color":"#f5efe6",
-  "lang":"ja"
+  "name": "小さな本棚",
+  "short_name": "本棚",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "lang": "ja",
+  "description": "オフラインで使えるシンプルな縦書き小説本棚"
 }
